@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resume preview</title>
+<style>
+  :root { --bg:#f1f5f9; --text:#0f172a; --muted:#64748b; --card:#fff; --line:#e2e8f0; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0b1220; --text:#e2e8f0; --muted:#94a3b8; --card:#111a2e; --line:#1f2a44; } }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 system-ui, sans-serif; }
+  header { padding:10px 16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; border-bottom:1px solid var(--line); background:var(--card); }
+  header b { font-size:15px; }
+  .muted { color:var(--muted); }
+  ul { margin:4px 0 0 18px; padding:0; }
+  iframe { width:100%; height:calc(100vh - 120px); border:0; }
+  a { color:#2563eb; }
+</style>
+</head>
+<body>
+<header><b id="t">Resume preview</b><span class="muted" id="m"></span><a id="dl" href="#" download="Resume.pdf">Download</a></header>
+<div style="padding:8px 16px" id="changes"></div>
+<iframe id="f" title="Resume PDF"></iframe>
+<script src="preview.js"></script>
+</body>
+</html>

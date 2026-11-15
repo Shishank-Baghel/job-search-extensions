@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Autopilot settings</title>
+<style>
+  :root { --bg:#f8fafc; --card:#fff; --text:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#1d4ed8; --warn:#92400e; --warnbg:#fffbeb; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0b1220; --card:#111a2e; --text:#e2e8f0; --muted:#94a3b8; --line:#1f2a44; --accent:#60a5fa; --warn:#fcd34d; --warnbg:#2a2110; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 920px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 0 0 10px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin-top:16px; }
+  .muted { color:var(--muted); }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:10px 14px; }
+  label { display:block; font-size:12px; color:var(--muted); margin-bottom:2px; }
+  input[type=text], input[type=number], input[type=password], textarea { width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:8px; background:transparent; color:var(--text); font:inherit; }
+  textarea { min-height: 140px; font: 12px/1.4 ui-monospace, Menlo, monospace; }
+  button { border:1px solid var(--line); background:var(--card); color:var(--text); border-radius:8px; padding:7px 12px; font:inherit; cursor:pointer; }
+  button.p { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; }
+  .warn { background:var(--warnbg); color:var(--warn); padding:10px 12px; border-radius:8px; margin-top:10px; }
+  .chk { display:flex; gap:8px; align-items:center; font-size:14px; color:var(--text); margin:4px 0; }
+  table { width:100%; border-collapse: collapse; font-size:13px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align: top; }
+  .scroll { max-height: 360px; overflow:auto; }
+  #toast { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:var(--accent); color:#fff; padding:8px 14px; border-radius:8px; display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Job Autopilot</h1>
+  <div class="muted">Everything here stays in this browser. Changes save when you press Save.</div>
+  <section class="card"><h2>Social job collector connection</h2><p>Copy this extension ID into the collector: <strong id="autopilotId"></strong></p><label for="collectorId">Trusted collector extension ID</label><input id="collectorId" type="text" placeholder="32-letter ID from chrome://extensions"><button id="saveCollector">Save collector connection</button> <span id="collectorStatus" role="status"></span><p class="muted">Only this extension can request application-log URLs or open a job in Autopilot.</p></section>
+
+  <section class="card">
+    <h2>Password template</h2>
+    <div class="muted">Used to create or sign in to career-site accounts (Workday, iCIMS, SuccessFactors…). Tokens: <code>{company}</code> amazon · <code>{Company}</code> Amazon · <code>{COMPANY}</code> AMAZON · <code>{c}</code> a · <code>{C}</code> A.</div>
+    <div class="row">
+      <input id="pw" type="password" placeholder="e.g. yourpass@123{Company}" style="max-width:340px" autocomplete="off">
+      <button id="pwShow">Show</button>
+      <span class="muted">Example for Amazon: <b id="pwPreview">—</b></span>
+    </div>
+    <div class="warn" id="pwWarn" style="display:none"></div>
+    <div class="warn">A password built from a pattern is guessable: if one company's site leaks it, the others follow. It's stored unencrypted in this browser profile.</div>
+  </section>
+
+  <section class="card">
+    <h2>Behaviour</h2>
+    <div id="settings"></div>
+  </section>
+
+  <section class="card">
+    <h2>Claude: new questions and stuck pages</h2>
+    <div class="muted">When a form asks something new, or a page won't move on (a date in the wrong format, a skill that didn't stick, an empty required box), the extension sends Claude the fields, the errors and your profile, resume and remembered answers. Claude corrects the fields using only those facts, and the extension submits on its own. Anything not on record still comes to you. Every Claude answer and fix is shown in the panel log and saved with the application.</div>
+    <div class="row">
+      <label><input id="aiUsePlan" type="checkbox"> Use my Claude plan through Claude Code on this computer</label>
+      <button id="aiTest">Test connection</button> <span id="aiStatus" class="muted"></span>
+    </div>
+    <div class="muted">One-time setup: in a terminal, run <code>bash native/install.sh</code> inside the extension folder, then reload the extension. Claude runs with all its tools switched off, so it can only answer. When your plan's usage limit is reached, the extension asks you instead until it resets.</div>
+    <div class="muted">Or use an API key instead (billed to the key; takes priority over the plan):</div>
+    <div class="row">
+      <input id="aiKey" type="password" placeholder="sk-ant-…" style="max-width:340px" autocomplete="off">
+      <button id="aiShow">Show</button>
+      <label for="aiModel" class="muted">Model</label><input id="aiModel" type="text" style="max-width:200px">
+    </div>
+    <div class="warn">Your profile, resume text, remembered answers and the form's field values go to Anthropic with each request (passwords, ID numbers and similar fields are never sent). The key is stored unencrypted in this browser profile. Leave it empty to keep everything local.</div>
+  </section>
+
+  <section class="card">
+    <h2>Optional Google Drive resume link</h2>
+    <div class="muted">Enable Google Drive API and configure a Google OAuth web client with this authorized redirect URI:</div>
+    <div id="driveRedirect"></div>
+    <label for="driveClientId">Google OAuth web client ID</label>
+    <input id="driveClientId" type="text" placeholder="….apps.googleusercontent.com">
+    <div class="muted">The panel button asks you to sign in, uploads the current tailored resume and gives anyone with the link viewer access. The original source PDF is never uploaded by this feature.</div>
+  </section>
+
+  <section class="card">
+    <h2>Resume</h2>
+    <div>Current: <b id="resName">—</b> <span class="muted" id="resDate"></span></div>
+    <div class="row"><input type="file" id="resFile" accept="application/pdf"><span class="muted" id="resStatus"></span></div>
+    <details><summary class="muted">Text used for the keyword check</summary><textarea id="resText" readonly></textarea></details>
+  </section>
+
+  <section class="card">
+    <h2>Resume content used for tailoring</h2>
+    <div class="muted">Your resume as data (bold = <code>**text**</code>). Tailoring picks a summary for the JD's role, re-orders and trims skills, and redraws the page in your original layout. Experience bullets are never rewritten. Edit carefully; it must stay valid JSON.</div>
+    <textarea id="resumeBase" style="min-height:220px"></textarea>
+  </section>
+
+  <section class="card">
+    <h2>Your answers</h2>
+    <div class="grid" id="profile"></div>
+  </section>
+
+  <section class="card">
+    <h2>Years per skill</h2>
+    <div class="muted">Rounded down from your resume dates. <code>null</code> = you have it but the duration is unknown (asked once). Skills not listed and not on your resume are answered 0 / No.</div>
+    <textarea id="skillYears"></textarea>
+  </section>
+
+  <section class="card">
+    <h2>Tech stack</h2>
+    <div class="muted">Comma-separated skills you have used. The extension uses this only when a form asks for your tech stack or technologies. Edit this list to keep it accurate.</div>
+    <textarea id="techStack" style="min-height:90px"></textarea>
+  </section>
+
+  <section class="card">
+    <h2>Skills on your record</h2>
+    <div class="muted">Comma-separated. A JD keyword in this list that your resume lacks shows as "safe to add".</div>
+    <textarea id="knownSkills" style="min-height:70px"></textarea>
+    <label style="margin-top:10px">Extra keywords to track in JDs (comma-separated)</label>
+    <input type="text" id="customKeywords" placeholder="Kafka, Socket.IO">
+  </section>
+
+  <section class="card">
+    <h2>Remembered answers</h2>
+    <div class="muted">Answers you gave in the panel, keyed by the question. Edit or delete lines here.</div>
+    <textarea id="learned"></textarea>
+  </section>
+
+  <section class="card">
+    <h2>Career-site accounts</h2>
+    <div class="muted">Sites where an account was created or signed in, and the company name used in the password.</div>
+    <textarea id="accounts" style="min-height:80px"></textarea>
+  </section>
+
+  <div class="row"><button class="p" id="save">Save</button><span class="muted" id="saveStatus"></span></div>
+
+  <section class="card">
+    <h2>Applications</h2>
+    <div class="row"><button id="exportCsv">Export CSV</button><button id="exportJson">Export JSON (for the ledger)</button><button id="clearLog">Clear log</button><span class="muted" id="logCount"></span></div>
+    <div class="scroll"><table><thead><tr><th></th><th>When</th><th>Status</th><th>Site</th><th>Company</th><th>Role</th><th>Match</th><th>Note</th></tr></thead><tbody id="logBody"></tbody></table></div>
+  </section>
+</main>
+<div id="toast"></div>
+<script src="defaults.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+const assert = require('node:assert/strict');
+const S = require('../social-core.js');
+assert.equal(S.key('https://www.example.com/jobs/1/?utm_source=x&job=7#top'), 'https://example.com/jobs/1?job=7');
+assert.equal(S.key('javascript:alert(1)'), '');
+assert.equal(S.date('3d • Edited', new Date(2026, 10, 15, 12)), '2026-11-12');
+assert.equal(S.date('2026-11-10T12:00:00Z'), '2026-11-10');
+assert.equal(S.date('unknown'), '');
+assert.equal(S.relevant('We are hiring a Full Stack Engineer to join our team'), true);
+assert.equal(S.relevant('Hiring a sales manager'), false);
+assert.equal(S.relevant('Software engineer discussing code'), false);
+const rows = [['posted','url','text'], ['2026-11-10','https://example.com/job/1','Hello, "world"\nagain']];
+assert.deepEqual(S.csv(S.encode(rows)), rows);
+assert.throws(() => S.csv('"unclosed'));
+console.log('Social matching, dates, URL normalization and CSV checks passed.');

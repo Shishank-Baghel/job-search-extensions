@@ -1,0 +1,72 @@
+{
+  "manifest_version": 3,
+  "name": "Job Autopilot (local)",
+  "version": "2.0.0",
+  "description": "Reads each JD, tailors your resume to it (same layout, 1 page), then fills and submits applications on LinkedIn, Naukri and company career sites. Asks you only for CAPTCHAs, OTPs and unknown answers.",
+  "permissions": [
+    "storage",
+    "identity",
+    "unlimitedStorage",
+    "scripting",
+    "offscreen",
+    "downloads",
+    "notifications",
+    "nativeMessaging"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Job Autopilot: show/hide panel",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "options_page": "options.html",
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+J"
+      },
+      "description": "Show/hide the Job Autopilot panel"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle",
+      "js": [
+        "content/util.js",
+        "content/keywords.js",
+        "content/answers.js",
+        "content/fields.js",
+        "content/history.js",
+        "content/account.js",
+        "content/sites.js",
+        "content/panel.js",
+        "content/main.js"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "externally_connectable": {
+    "ids": [
+      "*"
+    ]
+  }
+}
