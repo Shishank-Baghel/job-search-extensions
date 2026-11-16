@@ -1,16 +1,17 @@
 # Social Job Lead Collector
 
-A separate Chrome extension that scans posts already loaded in a LinkedIn, X/Twitter or Reddit tab for hiring and full-stack, frontend, backend and software-engineer terms. It saves job-like links locally, filters by an optional inclusive publication-date range, imports prior CSV URLs for deduplication, exports its leads as CSV, and connects to Job Autopilot.
+Choose a start and end publication date, open a search on LinkedIn, Reddit, X or Pinterest, scroll to load posts, then select that tab and scan. The collector runs locally on the loaded page, using your normal signed-in session where needed.
 
-## Install and connect
-1. In `chrome://extensions`, enable Developer mode. Choose **Load unpacked** and select this `social-job-collector` folder. Keep Job Autopilot installed as a separate extension, then reload Job Autopilot so its updated connection code is active.
-2. Open the collector from its toolbar icon (or its extension details → Extension options). Copy the displayed collector ID.
-3. In Job Autopilot settings, paste that ID under **Social job collector connection** and press **Save collector connection**. Copy the Job Autopilot ID shown there.
-4. Paste the Autopilot ID into the collector and press **Connect and sync**. This also imports social leads saved in the earlier combined version, if any. Only the paired collector can request log URLs or open a review tab; resume and profile data are not shared.
+It keeps hiring posts matching frontend, full-stack, backend and related software-engineering terms with explicitly stated experience fully within 2–4 years. For example, 2–4 or exactly 3 years qualifies; 3–6, 2+ and unstated experience are skipped. This conservative text filter can miss good roles or reject multi-role posts; check the original post before applying.
 
-## Find leads
-Open a social search/feed in another tab, scroll to load posts, choose it in the collector and scan. Enter dates to filter by publication date; posts without a readable date are excluded when dates are set. Relative dates are approximate. The scan checks previously collected URLs, imported CSV URLs, and fresh URLs from Job Autopilot's application log. Import a CSV with a `url`, `applyUrl`, `apply_url`, `job_url`, `link` or `post_url` column. Export downloads a new CSV with all stored leads; it does not edit an existing file.
+Export downloads a CSV filtered to the chosen inclusive dates with columns: posted, platform, person_name, person_title, experience, post_url, job_url, job_post. Names and titles are collected only when displayed. Reddit, X and Pinterest usually do not display a professional title, so that field may be empty. Posts without readable dates are skipped. Pinterest pins often lack dates and direct job links and therefore may produce no leads. Relative dates are approximate.
 
-Click **Open job in Autopilot** to open a lead in a new tab with hands-free disabled. Verify the employer, location, experience, compensation and that the role remains open; independently review the tailored application before starting Autopilot. It does not automatically submit leads: the existing Autopilot batch filters do not verify all those criteria.
+Earlier leads and imported CSV URLs prevent repeat job links. Import a CSV with a url, job_url, apply_url, applyUrl, link or post_url column. Export contains all saved leads matching the selected filters, once per URL; an identical later export can still include previously exported rows. Different URLs for one job can remain duplicates. Existing leads lacking poster metadata retain blank fields unless collected again.
 
-The collector only scans currently loaded posts, cannot reliably identify the poster's role, and may miss links or dates when a site changes its layout. Different URLs for the same job may remain duplicates. LinkedIn prohibits automated activity and may restrict accounts; stop at warnings or verification prompts.
+Load this folder via chrome://extensions → Developer mode → Load unpacked. Reload the extension after updates.
+
+Optional Job Autopilot connection: copy the collector ID into Job Autopilot Settings → Social job collector connection → Save collector connection. Copy the displayed Autopilot ID back into the collector and connect. It checks application-log URLs and opens selected jobs in review tabs. CSV collection works without that connection.
+
+The extension scans loaded posts only; it does not crawl all of social media. Searches use the dates directly on X and apply the date filter locally on every platform. Layout changes, login requirements and verification challenges may prevent collection. Stop at account warnings or challenges.
+
+Validation: node tests/social.test.js and node tests/pairing.test.js. The tests/e2e.py browser test requires Playwright and CHROME_FOR_TESTING pointing to a Chrome for Testing executable. It loads both extensions and checks date exclusions, poster metadata, CSV export, repeated scans and review-tab handoff using controlled posts for all four platforms.

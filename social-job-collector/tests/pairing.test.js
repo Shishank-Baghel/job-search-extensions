@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync('../job-autopilot/background.js', 'utf8');
+const source = fs.readFileSync(require('node:path').join(__dirname,'../../job-autopilot/background.js'), 'utf8');
 const code = source.slice(source.indexOf('chrome.runtime.onMessageExternal.addListener'), source.indexOf('// Toolbar icon / Alt+Shift+J:'));
 let listener; const state = {}; const tabs=[]; const paired='a'.repeat(32);
 const chrome = {runtime:{onMessageExternal:{addListener:f=>listener=f}},storage:{local:{get:async()=>({socialCollectorId:paired,log:[{url:'https://jobs.example/1',applyUrl:'https://jobs.example/apply/1'}],socialLeads:[],socialSeen:[]})}},tabs:{create:async()=>({id:1}),update:async(id,x)=>tabs.push(x.url)}};

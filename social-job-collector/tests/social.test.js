@@ -12,3 +12,13 @@ const rows = [['posted','url','text'], ['2026-11-10','https://example.com/job/1'
 assert.deepEqual(S.csv(S.encode(rows)), rows);
 assert.throws(() => S.csv('"unclosed'));
 console.log('Social matching, dates, URL normalization and CSV checks passed.');
+
+assert.equal(S.experience('Frontend developer, 2–4 years experience'), '2-4 years');
+assert.equal(S.experience('Backend engineer, 3 years experience'), '3 years');
+for(const text of ['5 years', '3-6 years', '2+ years', '2-4 years plus 5 years React', 'No experience stated']) assert.equal(S.experience(text), '');
+assert.equal(S.matches({posted:'2026-11-10',text:'Hiring backend engineer with 2-4 years'},'2026-11-10','2026-11-10'), true);
+assert.equal(S.matches({posted:'2026-11-09',text:'Hiring backend engineer with 2-4 years'},'2026-11-10','2026-11-11'), false);
+assert.match(decodeURIComponent(S.searches('2026-11-01','2026-11-10').x), /until:2026-11-11/);
+const multi='Hiring! Company: Apple\nRole: Frontend Engineer\nExperience: 2-4 years\nApply https://jobs.example/1\nCompany: Other\nRole: Backend engineer\nExperience: 5-8 years\nApply https://jobs.example/2';
+assert.equal(S.experience(S.context(multi,'https://jobs.example/1','https://jobs.example/1')),'2-4 years');
+assert.equal(S.experience(S.context(multi,'https://jobs.example/2','https://jobs.example/2')),'');

@@ -1,10 +1,22 @@
 {
   "manifest_version": 3,
   "name": "Social Job Lead Collector",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Collect hiring posts and connect job leads to Job Autopilot.",
-  "permissions": ["storage", "tabs", "scripting"],
-  "host_permissions": ["https://*.linkedin.com/*", "https://*.x.com/*", "https://*.twitter.com/*", "https://*.reddit.com/*"],
-  "action": { "default_popup": "social.html" },
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.linkedin.com/*",
+    "https://*.x.com/*",
+    "https://*.twitter.com/*",
+    "https://*.reddit.com/*",
+    "https://*.pinterest.com/*"
+  ],
+  "action": {
+    "default_popup": "social.html"
+  },
   "options_page": "social.html"
 }
